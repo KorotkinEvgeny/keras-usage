@@ -1,61 +1,70 @@
 from __future__ import print_function
 import numpy as np
+import json
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD
 from keras.utils import np_utils
 
-np.random.seed(1671)  # for reproducibility
 
-# network and training
-NB_EPOCH = 200
-BATCH_SIZE = 128
-VERBOSE = 1
-NB_CLASSES = 10   # number of outputs = number of digits
-OPTIMIZER = SGD() # SGD optimizer, explained later in this chapter
-N_HIDDEN = 128
-VALIDATION_SPLIT=0.2 # how much TRAIN is reserved for VALIDATION
 
-# data: shuffled and split between train and test sets
-#
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
+def main():
+    np.random.seed(1671)  # for reproducibility
 
-#X_train is 60000 rows of 28x28 values --> reshaped in 60000 x 784
-RESHAPED = 784
-#
-X_train = X_train.reshape(60000, RESHAPED)
-X_test = X_test.reshape(10000, RESHAPED)
-X_train = X_train.astype('float32')
-X_test = X_test.astype('float32')
+    # network and training
+    OPTIMIZER = SGD()  # SGD optimizer, explained later in this chapter
 
-# normalize 
-#
-X_train /= 255
-X_test /= 255
-print(X_train.shape[0], 'train samples')
-print(X_test.shape[0], 'test samples')
+    # data: shuffled and split between train and test sets
 
-# convert class vectors to binary class matrices
-Y_train = np_utils.to_categorical(y_train, NB_CLASSES)
-Y_test = np_utils.to_categorical(y_test, NB_CLASSES)
+    (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-# 10 outputs
-# final stage is softmax
+    # X_train is 60000 rows of 28x28 values --> reshaped in 60000 x 784
 
-model = Sequential()
-model.add(Dense(NB_CLASSES, input_shape=(RESHAPED,)))
-model.add(Activation('softmax'))
+    X_train = X_train.reshape(60000, CONFIG.get('RESHAPED'))
+    X_test = X_test.reshape(10000, CONFIG.get('RESHAPED'))
+    X_train = X_train.astype('float32')
+    X_test = X_test.astype('float32')
 
-model.summary()
+    # normalize
+    #
+    X_train /= 255
+    X_test /= 255
+    print(X_train.shape[0], 'train samples')
+    print(X_test.shape[0], 'test samples')
 
-model.compile(loss='categorical_crossentropy',
-              optimizer=OPTIMIZER,
-              metrics=['accuracy'])
+    # convert class vectors to binary class matrices
+    Y_train = np_utils.to_categorical(y_train, CONFIG.get('NB_CLASSES'))
+    Y_test = np_utils.to_categorical(y_test, CONFIG.get('NB_CLASSES'))
 
-history = model.fit(X_train, Y_train,
-                    batch_size=BATCH_SIZE, epochs=NB_EPOCH,
-                    verbose=VERBOSE, validation_split=VALIDATION_SPLIT)
-score = model.evaluate(X_test, Y_test, verbose=VERBOSE)
-print("\nTest score:", score[0])
-print('Test accuracy:', score[1])
+    # 10 outputs
+    # final stage is softmax
+
+    model = Sequential()
+    model.add(Dense(CONFIG.get('NB_CLASSES'), input_shape=(CONFIG.get('RESHAPED'),)))
+    model.add(Activation('softmax'))
+
+    model.summary()
+
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=OPTIMIZER,
+                  metrics=['accuracy'])
+
+    history = model.fit(X_train, Y_train,
+                        batch_size=CONFIG.get('BATCH_SIZE'),
+                        epochs=CONFIG.get('NB_EPOCH'),
+                        verbose=CONFIG.get('VERBOSE'),
+                        validation_split=CONFIG.get('VALIDATION_SPLIT'))# how much TRAIN is reserved for VALIDATION
+
+    score = model.evaluate(X_test, Y_test, verbose=CONFIG.get('VERBOSE'))
+    print("\nTest score:", score[0])
+    print('Test accuracy:', score[1])
+
+
+if __name__ == "__main__":
+
+    with open('chapter1_config.json') as json_data:
+        CONFIG = json.load(json_data)['V1']
+    print(CONFIG)
+
+    main()
