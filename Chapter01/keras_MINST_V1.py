@@ -9,8 +9,9 @@ from keras.utils import np_utils
 from logger import get_logger
 
 
-def create_layer():
 
+def create_layer():
+    pass
 
 def main():
     np.random.seed(1671)  # for reproducibility
