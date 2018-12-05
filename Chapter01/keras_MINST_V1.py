@@ -6,13 +6,17 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD
 from keras.utils import np_utils
-from utility.logger import get_logger
+from logger import get_logger
+
+
+def create_layer():
+
 
 def main():
     np.random.seed(1671)  # for reproducibility
 
     # network and training
-    OPTIMIZER = SGD()  # SGD optimizer, explained later in this chapter
+    optimizer = SGD()  # SGD optimizer, explained later in this chapter
 
     # data: shuffled and split between train and test sets
 
@@ -30,11 +34,7 @@ def main():
     #
     X_train /= 255
     X_test /= 255
-    logger.info('%s train samples', X_train.shape[0])
-    logger.info('%s train samples', X_train.shape[0])
-
-    # print(X_train.shape[0], 'train samples')
-    # print(X_test.shape[0], 'test samples')
+    logger.info('%s train samples \n%s test samples', X_train.shape[0], X_test.shape[0])
 
     # convert class vectors to binary class matrices
     Y_train = np_utils.to_categorical(y_train, CONFIG.get('NB_CLASSES'))
@@ -59,7 +59,7 @@ def main():
     model.summary()
 
     model.compile(loss='categorical_crossentropy',
-                  optimizer=OPTIMIZER,
+                  optimizer=optimizer,
                   metrics=['accuracy'])
 
     history = model.fit(X_train, Y_train,
@@ -69,10 +69,7 @@ def main():
                         validation_split=CONFIG.get('VALIDATION_SPLIT'))# how much TRAIN is reserved for VALIDATION
 
     score = model.evaluate(X_test, Y_test, verbose=CONFIG.get('VERBOSE'))
-    logger.info("\nTest score: %s", score[0])
-    logger.info("Test accuracy:", score[1])
-    # print("\nTest score:", score[0])
-    # print('Test accuracy:', score[1])
+    logger.info("\nTest score: %s \nTest accuracy: %s", score[0], score[1])
 
 
 if __name__ == "__main__":
