@@ -8,79 +8,85 @@ from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 from logger import get_logger
 
+from KerasBaseModel import KerasBaseModel
 TRAIN_ROWS = 60000
 TEST_ROWS = 10000
 
 np.random.seed(1671)  # for reproducibility
 
 
-class KerasNetwork:
-    nb_epoch = 200
-    batch_size = 128
-    verbose_value = 1
-    nb_classes = 10
-    n_hidden = 128
-    validation_split = 0.2
-    reshaped = 784
+class KerasNetwork(KerasBaseModel):
 
-    _optimizer = SGD()  # SGD optimizer, explained later in this chapter
 
-    def __init__(self):
-        self._model = None
-        self._score = None
-        self._dataset = None
-        self.history = None
+    def run_model(self):
+        print(self.nb_epoch)
 
-    @property
-    def model_epoch(self):
-        return self.nb_epoch
-
-    @model_epoch.setter
-    def model_epoch(self, epoch_input):
-        self.nb_epoch = epoch_input
-
-    @property
-    def verbose(self):
-        return self.verbose_value
-
-    @verbose.setter
-    def verbose(self, verbose_input):
-        verbose_allowed_values = [1, 2, 3]
-        if verbose_input in verbose_allowed_values:
-            self.verbose_value = verbose_input
-
-    @property
-    def model_description(self):
-
-        description = "Keras chapter 1 model " \
-                      "\n Epoch: {0}" \
-                      "\n Batch size: {1}" \
-                      "\n Verbose {2}" \
-                      "\n Classes {3}" \
-                      "\n Hidden {4}" \
-                      "\n Validation split {5}" \
-                      "\n Reshaped {6}".format(
-            self.nb_epoch,
-            self.batch_size,
-            self.verbose_value,
-            self.nb_classes,
-            self.n_hidden,
-            self.validation_split,
-            self.reshaped)
-
-        return description
-
-    @property
-    def optimizer(self):
-        return self._optimizer
-
-    @optimizer.setter
-    def optimizer(self, input_optimizer):
-        #TODO add Adam to import
-        allowed_optimizers = ['SGD', 'Adam']
-        if input_optimizer in allowed_optimizers:
-            self._optimizer = input_optimizer
-
+    # nb_epoch = 200
+    # batch_size = 128
+    # verbose_value = 1
+    # nb_classes = 10
+    # n_hidden = 128
+    # validation_split = 0.2
+    # reshaped = 784
+    #
+    # _optimizer = SGD()  # SGD optimizer, explained later in this chapter
+    #
+    # def __init__(self):
+    #     self._model = None
+    #     self._score = None
+    #     self._dataset = None
+    #     self.history = None
+    #
+    # @property
+    # def model_epoch(self):
+    #     return self.nb_epoch
+    #
+    # @model_epoch.setter
+    # def model_epoch(self, epoch_input):
+    #     self.nb_epoch = epoch_input
+    #
+    # @property
+    # def verbose(self):
+    #     return self.verbose_value
+    #
+    # @verbose.setter
+    # def verbose(self, verbose_input):
+    #     verbose_allowed_values = [1, 2, 3]
+    #     if verbose_input in verbose_allowed_values:
+    #         self.verbose_value = verbose_input
+    #
+    # @property
+    # def model_description(self):
+    #
+    #     description = "Keras chapter 1 model " \
+    #                   "\n Epoch: {0}" \
+    #                   "\n Batch size: {1}" \
+    #                   "\n Verbose {2}" \
+    #                   "\n Classes {3}" \
+    #                   "\n Hidden {4}" \
+    #                   "\n Validation split {5}" \
+    #                   "\n Reshaped {6}".format(
+    #         self.nb_epoch,
+    #         self.batch_size,
+    #         self.verbose_value,
+    #         self.nb_classes,
+    #         self.n_hidden,
+    #         self.validation_split,
+    #         self.reshaped)
+    #
+    #     return description
+    #
+    # @property
+    # def optimizer(self):
+    #     return self._optimizer
+    #
+    # @optimizer.setter
+    # def optimizer(self, input_optimizer):
+    #     #TODO add Adam to import
+    #     allowed_optimizers = ['SGD', 'Adam']
+    #     if input_optimizer in allowed_optimizers:
+    #         self._optimizer = input_optimizer
+    #
     #TODO move it out of property
     @property
     def dataset(self):
@@ -104,8 +110,8 @@ class KerasNetwork:
     def model(self):
         if not self.model:
             self._model = Sequential(
-                [Dense(CONFIG.get('NB_CLASSES'),
-                       input_shape=(CONFIG.get('RESHAPED'),)),
+                [Dense(self.nb_classes,
+                       input_shape=(self.reshaped,)),
                  Activation('softmax')])
             self._model.summary()
 
@@ -132,7 +138,12 @@ class KerasNetwork:
 
 
 def main():
-    neural_network = KerasNetwork()
+
+    keras1 = KerasNetwork()
+
+    print(keras1.score[0])
+
+    # neural_network = KerasNetwork()
     # network and training
 
     # data: shuffled and split between train and test sets
