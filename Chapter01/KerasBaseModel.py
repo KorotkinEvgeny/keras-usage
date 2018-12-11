@@ -1,4 +1,4 @@
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 
 
 class KerasBaseModel:
@@ -9,15 +9,10 @@ class KerasBaseModel:
     n_hidden = 128
     validation_split = 0.2
     reshaped = 784
-
-    _optimizer = SGD()  # SGD optimizer, explained later in this chapter
+    _optimizer = SGD()
 
     def __init__(self):
-        self._model = None
-        self._score = None
-        self._dataset = None
-        self.history = None
-
+        self._optimizer = None
 
     @property
     def model_epoch(self):
@@ -65,6 +60,5 @@ class KerasBaseModel:
     @optimizer.setter
     def optimizer(self, input_optimizer):
         # TODO add Adam to import
-        allowed_optimizers = ['SGD', 'Adam']
-        if input_optimizer in allowed_optimizers:
-            self._optimizer = input_optimizer
+        allowed_optimizers = {'SGD': SGD, 'Adam': Adam}
+        self._optimizer = allowed_optimizers.get(input_optimizer, SGD())
