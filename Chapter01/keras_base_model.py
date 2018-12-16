@@ -11,8 +11,8 @@ class KerasBaseModel:
     reshaped = 784
     _optimizer = SGD()
 
-    def __init__(self):
-        self._optimizer = None
+    # def __init__(self):
+    #     self._optimizer = SGD()
 
     @property
     def model_epoch(self):
@@ -61,4 +61,8 @@ class KerasBaseModel:
     def optimizer(self, input_optimizer):
         # TODO add Adam to import
         allowed_optimizers = {'SGD': SGD, 'Adam': Adam}
-        self._optimizer = allowed_optimizers.get(input_optimizer, SGD())
+        if input_optimizer == 'Adam':
+            self._optimizer = Adam()
+        if input_optimizer == 'SGD':
+            self._optimizer = SGD()
+        # self._optimizer = allowed_optimizers.get(input_optimizer, SGD())

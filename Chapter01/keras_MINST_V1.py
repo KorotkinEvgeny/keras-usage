@@ -12,7 +12,7 @@ from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 from logger import get_logger
-from KerasBaseModel import KerasBaseModel
+from keras_base_model import KerasBaseModel
 
 TRAIN_ROWS = 60000
 TEST_ROWS = 10000
@@ -24,6 +24,7 @@ Score = namedtuple('Score', ['test_score', 'test_accuracy'])
 class KerasNetworkCh1(KerasBaseModel):
 
     def __init__(self):
+        super().__init__()
         self._model = None
         self._score = None
         self._dataset = None
@@ -80,7 +81,11 @@ class KerasNetworkCh1(KerasBaseModel):
 def main():
 
     # keras1 = KerasNetworkCh1()
-    fire.Fire(KerasNetworkCh1)
+    # fire.Fire(KerasNetworkCh1)
+    kerasCh1 = KerasNetworkCh1()
+    kerasCh1.model_epoch = 10
+    kerasCh1.optimizer = "Adam"
+    fire.Fire(kerasCh1)
 
     # print(keras1.dataset.X_train.shape[0], 'train samples')
     # print(keras1.dataset.X_test.shape[0], 'test samples')
