@@ -6,9 +6,9 @@ import fire
 import numpy as np
 import json
 
-from keras.datasets import mnist
+from keras.datasets import mnist, fashion_mnist
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation
+from keras.layers.core import Dense, Activation, Dropout
 from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 from logger import get_logger
@@ -20,6 +20,8 @@ TEST_ROWS = 10000
 np.random.seed(1671)  # for reproducibility
 Dataset = namedtuple('Dataset', ['X_train', 'Y_train', 'X_test', 'Y_test'])
 Score = namedtuple('Score', ['test_score', 'test_accuracy'])
+
+DROPOUT = 0.3
 
 class KerasNetworkCh1(KerasBaseModel):
 
@@ -49,10 +51,24 @@ class KerasNetworkCh1(KerasBaseModel):
     @property
     def model(self):
         if not self._model:
-            self._model = Sequential(
-                [Dense(self.nb_classes,
-                       input_shape=(self.reshaped,)),
-                 Activation('softmax')])
+            # self._model = Sequential(
+            #     [Dense(self.nb_classes,
+            #            input_shape=(self.reshaped,)),
+            #      Activation('softmax')])
+
+            self._model = Sequential()
+            self._model.add(Dense(self.nb_classes,
+                   input_shape=(self.reshaped,)))
+            self._model.add(Activation('softmax'))
+
+
+            self._model.add(Dense(128))
+            self._model.add(Activation('relu'))
+            self._model.add(Dropout(DROPOUT))
+            self._model.add(Dense(self.nb_classes))
+            self._model.add(Activation('softmax'))
+
+
             self._model.summary()
 
             self._model.compile(loss='categorical_crossentropy',
@@ -83,7 +99,7 @@ def main():
     # keras1 = KerasNetworkCh1()
     # fire.Fire(KerasNetworkCh1)
     kerasCh1 = KerasNetworkCh1()
-    kerasCh1.model_epoch = 10
+    kerasCh1.model_epoch = 50
     kerasCh1.optimizer = "Adam"
     fire.Fire(kerasCh1)
 
