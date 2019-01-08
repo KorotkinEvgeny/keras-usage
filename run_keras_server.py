@@ -18,10 +18,22 @@ import flask
 import io
 
 from scipy.misc import imread, imresize
-from skimage import color
 # initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
 model = None
+
+label_dict = {
+ 0: 'T-shirt/top',
+ 1: 'Trouser',
+ 2: 'Pullover',
+ 3: 'Dress',
+ 4: 'Coat',
+ 5: 'Sandal',
+ 6: 'Shirt',
+ 7: 'Sneaker',
+ 8: 'Bag',
+ 9: 'Ankle boot'
+}
 
 
 # def load_model():
@@ -47,16 +59,25 @@ def prepare_image(image):
     # image = img_to_array(image)
     # image = np.expand_dims(image, axis=0)
 
-    image_data = np.asarray(image)
+    # image_data = np.asarray(image)
+    # img = cv2.resize(image, (28, 28))
+    # img.reshape((28, 28))
+    img = img_to_array(image)
 
-    img = cv2.resize(image_data, (28,28))
-    img.reshape((28, 28))
+    # img = cv2.resize(img, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
+    img = cv2.resize(img, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
+    img.reshape(28, 28, 1)
+    # img = np.expand_dims(img, axis=0)
+    # img.resize(28,28,28,1)
+    # img = img.reshape(img.shape[0], 28,28,1)
+    # img = img.reshape(img,[1,28,28,1])
+    # img = img.reshape(img.shape[0], 784)
 
-    batch = np.expand_dims(img, axis=0)
-    batch = np.expand_dims(batch, axis=3)
+    # batch = np.expand_dims(img, axis=0)
+    # batch = np.expand_dims(batch, axis=3)
 
     # return the processed image
-    return batch
+    return img
 
 
 @app.route("/predict", methods=["POST"])
@@ -79,9 +100,13 @@ def predict():
             # classify the input image and then initialize the list
             # of predictions to return to the client
             preds = model.predict(image)
+            print(preds)
+            y_classes = preds.argmax(axis=-1)
+            print(y_classes)
+            predicted_label = label_dict[y_classes[0]]
             # results = imagenet_utils.decode_predictions(preds)
             # data["predictions"] = []
-            data["predictions"] = preds
+            data["predictions"] = predicted_label
 
             # loop over the results and add them to the list of
             # returned predictions
@@ -90,7 +115,7 @@ def predict():
             #     data["predictions"].append(r)
             #
             # # indicate that the request was a success
-            # data["success"] = True
+            data["success"] = True
 
     # return the data dictionary as a JSON response
     print(data)
@@ -106,6 +131,6 @@ if __name__ == "__main__":
 
     model = load_model('cnn4_model.h5')
     model._make_predict_function()
-    # model.load_weights('cnn4_weights.h5')
+    model.load_weights('cnn4_weights.h5')
 
     app.run()
