@@ -50,34 +50,17 @@ def prepare_image(image):
     # if image.mode != "RGB":
     #     image = image.convert("RGB")
 
-    # resize the input image and preprocess it
-    # img = color.rgb2gray(imread(image, mode='L'))
-    # img = color.rgb2gray(image)
-    #
-    # img = img.reshape(1, 28, 28, 1)
-    # image = image.resize(target)
-    # image = img_to_array(image)
-    # image = np.expand_dims(image, axis=0)
+    image = image.resize((28, 28))
+    image = image.convert('L')
+    image = img_to_array(image)
 
-    # image_data = np.asarray(image)
-    # img = cv2.resize(image, (28, 28))
-    # img.reshape((28, 28))
-    img = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
 
+
+    # img = img_to_array(image)
     # img = cv2.resize(img, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
-    img = cv2.resize(img, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
-    img.reshape(28, 28, 1)
-    # img = np.expand_dims(img, axis=0)
-    # img.resize(28,28,28,1)
-    # img = img.reshape(img.shape[0], 28,28,1)
-    # img = img.reshape(img,[1,28,28,1])
-    # img = img.reshape(img.shape[0], 784)
-
-    # batch = np.expand_dims(img, axis=0)
-    # batch = np.expand_dims(batch, axis=3)
-
-    # return the processed image
-    return img
+    # img.reshape(28, 28, 1)
+    return image
 
 
 @app.route("/predict", methods=["POST"])
@@ -99,14 +82,14 @@ def predict():
 
             # classify the input image and then initialize the list
             # of predictions to return to the client
-            preds = model.predict(image)
-            print(preds)
-            y_classes = preds.argmax(axis=-1)
-            print(y_classes)
-            predicted_label = label_dict[y_classes[0]]
+            preds = model.predict(image).tolist()
+            # print(preds)
+            # y_classes = preds.argmax(axis=-1)
+            # print(y_classes)
+            # predicted_label = label_dict[y_classes[0]]
             # results = imagenet_utils.decode_predictions(preds)
             # data["predictions"] = []
-            data["predictions"] = predicted_label
+            data["predictions"] = preds
 
             # loop over the results and add them to the list of
             # returned predictions
