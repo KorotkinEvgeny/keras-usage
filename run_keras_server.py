@@ -1,26 +1,24 @@
-# USAGE
-# Start the server:
-# 	python run_keras_server.py
-# Submit a request via cURL:
-# 	curl -X POST -F image=@dog.jpg 'http://localhost:5000/predict'
-# Submita a request via Python:
-#	python simple_request.py
-
-# import the necessary packages
 import cv2
+import keras
 from keras.applications import ResNet50
-from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import img_to_array, load_img
 from keras.applications import imagenet_utils
+from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras.models import load_model
 from PIL import Image
 import numpy as np
 import flask
 import io
 
+import tensorflow as tf
+graph = tf.get_default_graph()
+
 from scipy.misc import imread, imresize
 # initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
 model = None
+model_vgg16 = None
 
 label_dict = {
  0: 'T-shirt/top',
@@ -36,14 +34,13 @@ label_dict = {
 }
 
 
-# def load_model():
-#     # load the pre-trained Keras model (here we are using a model
-#     # pre-trained on ImageNet and provided by Keras, but you can
-#     # substitute in your own networks just as easily)
-#     global model
-#     # model = ResNet50(weights="imagenet")
-#     model = load_model()
+def vgg16_prepare_image(image):
+    img = load_img(image, target_size=(224, 224))
+    img = img_to_array(img)
+    img = np.expand_dims(img, axis=0)
+    img = preprocess_input(img)
 
+    return img
 
 def prepare_image(image):
     # if the image mode is not RGB, convert it
@@ -105,6 +102,30 @@ def predict():
     return flask.jsonify(data)
 
 
+@app.route("/pretrained", methods=["POST"])
+def pretrained_predict():
+
+    data = {"success": False}
+
+    if flask.request.method == "POST":
+        if flask.request.files.get("image"):
+            # image = flask.request.files["image"].read()
+            image = flask.request.files["image"]
+            # image = Image.open(io.BytesIO(image))
+
+            preprocessed_image = vgg16_prepare_image(image)
+
+            # preds = model_vgg16.predict(preprocessed_image)
+
+            with graph.as_default():
+                preds = model_vgg16.predict(preprocessed_image)
+
+            data['predictions'] = str(decode_predictions(preds, top=3)[0])
+            data["success"] = True
+
+    return flask.jsonify(data)
+
+
 # if this is the main thread of execution first load the model and
 # then start the server
 if __name__ == "__main__":
@@ -115,5 +136,6 @@ if __name__ == "__main__":
     model = load_model('cnn4_model.h5')
     model._make_predict_function()
     model.load_weights('cnn4_weights.h5')
+    model_vgg16 = VGG16(weights='imagenet')
 
     app.run()
