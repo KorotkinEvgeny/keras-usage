@@ -1,8 +1,4 @@
-import cv2
-import keras
-from keras.applications import ResNet50
 from keras.preprocessing.image import img_to_array, load_img
-from keras.applications import imagenet_utils
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras.models import load_model
@@ -14,8 +10,6 @@ import io
 import tensorflow as tf
 graph = tf.get_default_graph()
 
-from scipy.misc import imread, imresize
-# initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
 model = None
 model_vgg16 = None
@@ -42,10 +36,8 @@ def vgg16_prepare_image(image):
 
     return img
 
+
 def prepare_image(image):
-    # if the image mode is not RGB, convert it
-    # if image.mode != "RGB":
-    #     image = image.convert("RGB")
 
     image = image.resize((28, 28))
     image = image.convert('L')
@@ -53,20 +45,13 @@ def prepare_image(image):
 
     image = np.expand_dims(image, axis=0)
 
-
-    # img = img_to_array(image)
-    # img = cv2.resize(img, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
-    # img.reshape(28, 28, 1)
     return image
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    # initialize the data dictionary that will be returned from the
-    # view
     data = {"success": False}
 
-    # ensure an image was properly uploaded to our endpoint
     if flask.request.method == "POST":
         if flask.request.files.get("image"):
             # read the image in PIL format
@@ -80,21 +65,8 @@ def predict():
             # classify the input image and then initialize the list
             # of predictions to return to the client
             preds = model.predict(image).tolist()
-            # print(preds)
-            # y_classes = preds.argmax(axis=-1)
-            # print(y_classes)
-            # predicted_label = label_dict[y_classes[0]]
-            # results = imagenet_utils.decode_predictions(preds)
-            # data["predictions"] = []
             data["predictions"] = preds
 
-            # loop over the results and add them to the list of
-            # returned predictions
-            # for (imagenetID, label, prob) in results[0]:
-            #     r = {"label": label, "probability": float(prob)}
-            #     data["predictions"].append(r)
-            #
-            # # indicate that the request was a success
             data["success"] = True
 
     # return the data dictionary as a JSON response
@@ -104,18 +76,13 @@ def predict():
 
 @app.route("/pretrained", methods=["POST"])
 def pretrained_predict():
-
     data = {"success": False}
 
     if flask.request.method == "POST":
         if flask.request.files.get("image"):
-            # image = flask.request.files["image"].read()
             image = flask.request.files["image"]
-            # image = Image.open(io.BytesIO(image))
 
             preprocessed_image = vgg16_prepare_image(image)
-
-            # preds = model_vgg16.predict(preprocessed_image)
 
             with graph.as_default():
                 preds = model_vgg16.predict(preprocessed_image)
